@@ -949,21 +949,25 @@ io.sockets.on('connection', function (socket) {
 							imgPath = filepath + "folder.jpg";
 						}
 						if(fs.existsSync(imgPath) && !imgPath.includes(coverArtFolder)){
-							metadata.image = (imgPath).replace(/\\/g, "/");
+							metadata.imagePath = (imgPath).replace(/\\/g, "/");
 							logs('Info',"Starting the download process CODE:1");
 							condownload();
 						}else{
 							request.get(metadata.image, {encoding: 'binary'}, function(error,response,body){
 								if(error){
+									logs('Error', error.stack);
 									metadata.image = undefined;
+									metadata.imagePath = undefined;
 									return;
 								}
 								fs.outputFile(imgPath,body,'binary',function(err){
 									if(err){
-										metadata.image = undefined;
+										logs('Error', err.stack);
+									metadata.image = undefined;
+									metadata.imagePath = undefined;
 										return;
 									}
-									metadata.image = (imgPath).replace(/\\/g, "/");
+									metadata.imagePath = (imgPath).replace(/\\/g, "/");
 									logs('Info',"Starting the download process CODE:2");
 									condownload();
 								})
@@ -1076,8 +1080,10 @@ io.sockets.on('connection', function (socket) {
 								let processor = new mflac.Processor({parseMetaDataBlocks: true});
 								
 								let vendor = 'reference libFLAC 1.2.1 20070917';
-								
-								let cover = fs.readFileSync(metadata.image);
+								let cover = null;
+								if(metadata.imagePath){
+									cover = fs.readFileSync(metadata.imagePath);
+								}
 								let mdbVorbisPicture;
 								let mdbVorbisComment;
 								processor.on('preprocess', (mdb) => {
@@ -1101,7 +1107,9 @@ io.sockets.on('connection', function (socket) {
 										}else if(configFile.userDefined.artworkSize.includes("500")){
 											res = 500;
 										}
-										mdbVorbisPicture = mflac.data.MetaDataBlockPicture.create(true, 3, 'image/jpeg', '', res, res, 24, 0, cover);
+										if(cover){
+											mdbVorbisPicture = mflac.data.MetaDataBlockPicture.create(true, 3, 'image/jpeg', '', res, res, 24, 0, cover);
+										}
 										mdbVorbisComment = mflac.data.MetaDataBlockVorbisComment.create(false, vendor, flacComments);
 										mdb.isLast = false;
 									}
@@ -1115,6 +1123,8 @@ io.sockets.on('connection', function (socket) {
 									if (mdbVorbisPicture && mdbVorbisComment) {
 										processor.push(mdbVorbisComment.publish());
 										processor.push(mdbVorbisPicture.publish());
+									}else if(mdbVorbisComment){
+										processor.push(mdbVorbisComment.publish());
 									}
 								});
 
@@ -1125,8 +1135,6 @@ io.sockets.on('connection', function (socket) {
 								reader.pipe(processor).pipe(writer);
 							}else{
 								const songBuffer = fs.readFileSync(tempPath);
-								const coverBuffer = fs.readFileSync(metadata.image);
-
 								const writer = new ID3Writer(songBuffer);
 								writer.setFrame('TIT2', metadata.title)
 									.setFrame('TPE1', [metadata.artist])
@@ -1140,11 +1148,14 @@ io.sockets.on('connection', function (socket) {
 										description: 'BARCODE',
 										value: metadata.BARCODE
 									})
-									.setFrame('APIC', {
+								if(metadata.imagePath){
+									const coverBuffer = fs.readFileSync(metadata.imagePath);
+									writer.setFrame('APIC', {
 										type: 3,
 										data: coverBuffer,
 										description: 'front cover'
 									});
+								}
 								if(metadata.unsynchronisedLyrics){
 									writer.setFrame('USLT', metadata.unsynchronisedLyrics);
 								}
