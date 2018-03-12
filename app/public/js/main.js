@@ -183,7 +183,7 @@ function fillSettingsModal(settings) {
 	$('#modal_settings_cbox_syncedlyrics').prop('checked', settings.syncedlyrics);
 	$('#modal_settings_cbox_numplaylistbyalbum').prop('checked', settings.numplaylistbyalbum);
 	$('#modal_settings_input_downloadTracksLocation').val(settings.downloadLocation);
-	$('#modal_settings_select_artworkSize').val(settings.artworkSize);
+	$('#modal_settings_select_artworkSize').val(settings.artworkSize).material_select();
 
 	Materialize.updateTextFields()
 }
