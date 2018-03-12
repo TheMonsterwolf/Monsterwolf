@@ -25,6 +25,9 @@ socket.on("newupdate", function(ver, dllink){
 	}
 });
 socket.emit("autologin");
+socket.on("message", function(title, msg){
+	message(title, msg);
+});
 //Login button
 $('#modal_login_btn_login').click(function () {
 	$('#modal_login_btn_login').attr("disabled", true);
