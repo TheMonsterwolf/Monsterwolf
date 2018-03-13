@@ -921,7 +921,11 @@ io.sockets.on('connection', function (socket) {
 								lyricsbuffer += track["LYRICS_SYNC_JSON"][i+1].lrc_timestamp+track["LYRICS_SYNC_JSON"][i].line+"\r\n";
 							}
 						}
-						fs.outputFile(writePath.substring(0,writePath.length-5)+".lrc",lyricsbuffer,function(){});
+						if(track.format == 9){
+							fs.outputFile(writePath.substring(0,writePath.length-5)+".lrc",lyricsbuffer,function(){});
+						}else{
+							fs.outputFile(writePath.substring(0,writePath.length-4)+".lrc",lyricsbuffer,function(){});
+						}
 					}
 					Deezer.logs('Info','Downloading file to ' + writePath);
 					if (fs.existsSync(writePath)) {

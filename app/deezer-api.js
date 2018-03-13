@@ -171,7 +171,7 @@ Deezer.prototype.getAlbumTracks = function(id, callback) {
 
 Deezer.prototype.getAlbumTracksAdv = function(id, callback) {
 	var self = this;
-	request.post({url: self.apiUrl, headers: self.httpHeaders, qs: Object.assign(self.apiQueries,{method:"deezer.pageAlbum"}), body: {alb_id:id,lang:"en",tab:0}, json: true, jar: true}, function(err, res, body) {
+	request.post({url: self.apiUrl, headers: self.httpHeaders, qs: Object.assign({method:"deezer.pageAlbum"},self.apiQueries), body: {alb_id:id,lang:"en",tab:0}, json: true, jar: true}, function(err, res, body) {
 		if (!err && res.statusCode == 200){
 			callback(body.results["SONGS"]);
 		} else {
@@ -182,7 +182,7 @@ Deezer.prototype.getAlbumTracksAdv = function(id, callback) {
 
 Deezer.prototype.getPlaylistTracksAdv = function(id, callback) {
 	var self = this;
-	request.post({url: self.apiUrl, headers: self.httpHeaders, qs: Object.assign(self.apiQueries,{method:"deezer.pagePlaylist"}), body: {playlist_id:id.toString(),lang:"en",nb:100000,start:0,tab:0,tags:true,header:true}, json: true, jar: true}, function(err, res, body) {
+	request.post({url: self.apiUrl, headers: self.httpHeaders, qs: Object.assign({method:"deezer.pagePlaylist"},self.apiQueries), body: {playlist_id:id.toString(),lang:"en",nb:100000,start:0,tab:0,tags:true,header:true}, json: true, jar: true}, function(err, res, body) {
 		if (!err && res.statusCode == 200){
 			callback(body.results["SONGS"]);
 		} else {
