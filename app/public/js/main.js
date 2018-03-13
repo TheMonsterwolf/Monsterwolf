@@ -518,8 +518,8 @@ socket.on("getTrackList", function (data) {
 
 			generateDownloadLink(trackList[i].link).appendTo(tableBody.children('tr:last')).wrap('<td>');
 		}
-	} else if(data.reqType == 'album' || data.reqType == 'playlist')	{
-		trackListSelectiveModalApp.title = 'Tracklist';
+	} else if(data.reqType == 'playlist') {
+		trackListSelectiveModalApp.title = 'Playlist';
 
 		trackListSelectiveModalApp.head = [
 			{title: '#'},
@@ -533,6 +533,37 @@ socket.on("getTrackList", function (data) {
 
 		for (var i = 0; i < trackList.length; i++) {
 			$(tableBody).append('<tr><td>' + (i + 1) + '</td>' +
+					(trackList[i].explicit_lyrics ? '<td><i class="material-icons valignicon tiny materialize-red-text tooltipped" data-tooltip="Explicit">error_outline</i> ' : '<td> ') + trackList[i].title + '</td>' +
+					'<td>' + trackList[i].artist.name + '</td>' +
+					'<td>' + convertDuration(trackList[i].duration) + '</td>' +
+					'<td><div class="valign-wrapper"><input class="trackCheckbox valign" type="checkbox" id="trackChk'+ i +'" value="' + trackList[i].link + '"><label for="trackChk' + i + '"></label></div></tr>');
+		}
+	} else if(data.reqType == 'album') {
+		trackListSelectiveModalApp.title = 'Tracklist';
+
+		trackListSelectiveModalApp.head = [
+			{title: '#'},
+			{title: 'Song'},
+			{title: 'Artist'},
+			{title: '<i class="material-icons">timer</i>'},
+			{title: '<div class="valign-wrapper"><input class="selectAll" type="checkbox" id="selectAll"><label for="selectAll"></label></div>'}
+		];
+
+		$('.selectAll').prop('checked', false);
+
+		if (trackList[trackList.length-1].disk_number != 1){
+			baseDisc = 0
+		} else {
+			baseDisc =1
+		};
+
+		for (var i = 0; i < trackList.length; i++) {
+			discNum = trackList[i].disk_number
+			if (discNum != baseDisc){
+				$(tableBody).append('<tr><td colspan="4" style="opacity: 0.54;"><i class="material-icons valignicon tiny">album</i> '+discNum+'</td></tr>');
+				baseDisc = discNum;
+			}
+			$(tableBody).append('<tr><td>' + trackList[i].track_position + '</td>' +
 					(trackList[i].explicit_lyrics ? '<td><i class="material-icons valignicon tiny materialize-red-text tooltipped" data-tooltip="Explicit">error_outline</i> ' : '<td> ') + trackList[i].title + '</td>' +
 					'<td>' + trackList[i].artist.name + '</td>' +
 					'<td>' + convertDuration(trackList[i].duration) + '</td>' +
