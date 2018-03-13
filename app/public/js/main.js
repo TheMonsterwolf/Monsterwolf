@@ -162,10 +162,10 @@ $('#modal_login_btn_signup').click(function(){
 });
 
 $('#modal_settings_btn_logout').click(function () {
-		$('#initializing').css('display', 'block');
+		$('#initializing').css('display', '');
 		$('#initializing').addClass('animated fadeIn').on('webkitAnimationEnd', function () {
 			$(this).removeClass('animated fadeIn');
-			$(this).css('display', 'block');
+			$(this).css('display', '');
 		});
 		socket.emit('logout');
 		$('#modal_login_input_username').val("");
