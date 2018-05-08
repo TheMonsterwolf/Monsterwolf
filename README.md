@@ -2,7 +2,7 @@
 DeezLoader Reborn is here to replace the old DeezLoader V2.3.1.<br/>
 With this software you can download high-qualiy music and enjoy.
 
-**Telegram Link** - https://t.me/joinchat/AAAAAFCRjRpUr-IF96RV3g
+**Telegram News Channel** - https://t.me/joinchat/AAAAAFCRjRpUr-IF96RV3g
 
 
 # Features
