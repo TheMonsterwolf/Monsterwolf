@@ -18,14 +18,14 @@ With this software you can download high-qualiy music and enjoy.
 - Windows installer: [DeezLoader-3.1.2-win-64&32-installer.exe](https://mega.nz/#!yCwWDKjZ!oGZ-BfE1eiL4NZyt4tJ-lJ1UE81NsCWJEoJG2kASYoM)
 - Windows x64 portable: [DeezLoader-3.1.2-win-64-portable.7z](https://mega.nz/#!3aYUkSxL!Uspl_kEOe5-J9DKZw22Y8uNWn-yzbYnKH1sIKJYqBH8)
 - Windows x86 portable: [DeezLoader-3.1.2-win-32-portable.7z]()
-- Linux x64: [DeezLoader-3.1.2-linux-64.AppImage]()
-- Linux x86: [DeezLoader-3.1.2-linux-32.AppImage]()
+- Linux  [DeezLoader-3.1.2-linux.AppImage](https://mega.nz/#!SXIhAB6B!6xtKyB_TZD5fLpV7ub8BBll8wiLiKYiSqvSGM8Oe8YI)
+
 - Mac x64: [DeezLoader-3.1.2-mac-64.dmg]()
 
 # Virus total
 - Windows installer: [DeezLoader-3.1.2-win-64&32-installer.exe](https://www.virustotal.com/#/file/8d794a8650cde5714efe7768e27e11017ff8aa92af8f3496408da596162098bf)
-- Linux x64: [DeezLoader-3.1.2-linux-64.AppImage]()
-- Linux x86: [DeezLoader-3.1.2-linux-32.AppImage]()
+- Linux : [DeezLoader-3.1.2-linux.AppImage](https://www.virustotal.com/#/file/c01ea0f36b04c60e7c229b764356a3f4caf012c411ddf2a1624e5d9c684a89c8)
+
 - Mac x64: [DeezLoader-3.1.2-mac-64.dmg]()
 
 # Donations
