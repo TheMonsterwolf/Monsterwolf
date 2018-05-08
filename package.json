@@ -12,7 +12,7 @@
 	"build": {
 		"appId": "extlrd.DeezLoader",
 		"productName": "DeezLoader",
-		"copyright": "Copyright © 2017 ExtendLord",
+		"copyright": "Copyright © 2018 ExtendLord",
 		"asar": false,
 		"win":{
 			"icon": "res/icon.ico"

@@ -1,11 +1,9 @@
-# DeezLoader Reborn V3.1.1 final
+# DeezLoader Reborn V3.1.2 final
 DeezLoader Reborn is here to replace the old DeezLoader V2.3.1.<br/>
 With this software you can download high-qualiy music and enjoy.
 
-**DeezLoader Reborn is no longer maintained due to DMCA**<br/>
-**3.1.1 is the last update, no more updates will be made**
+**Telegram Link** - https://t.me/joinchat/AAAAAFCRjRpUr-IF96RV3g
 
-**EDIT: DeezLoader Reborn got updated because of Deezer's patch**
 
 # Features
 - Download FLAC/MP3-320 music content from Deezer(FLAC needs to be turned on in the settings 'turn on HIFI')
@@ -17,19 +15,18 @@ With this software you can download high-qualiy music and enjoy.
 - Simple and user friendly
 
 # Download Links
-- Source code: [DeezLoader-3.1.1-src.zip]()
-- Windows installer: [DeezLoader-3.1.1-win-64&32-installer.exe]()
-- Windows x64 portable: [DeezLoader-3.1.1-win-64-portable.7z]()
-- Windows x86 portable: [DeezLoader-3.1.1-win-32-portable.7z]()
-- Linux x64: [DeezLoader-3.1.1-linux-64.AppImage]()
-- Linux x86: [DeezLoader-3.1.1-linux-32.AppImage]()
-- Mac x64: [DeezLoader-3.1.1-mac-64.dmg]()
+- Windows installer: [DeezLoader-3.1.2-win-64&32-installer.exe](https://mega.nz/#!yCwWDKjZ!oGZ-BfE1eiL4NZyt4tJ-lJ1UE81NsCWJEoJG2kASYoM)
+- Windows x64 portable: [DeezLoader-3.1.2-win-64-portable.7z](https://mega.nz/#!3aYUkSxL!Uspl_kEOe5-J9DKZw22Y8uNWn-yzbYnKH1sIKJYqBH8)
+- Windows x86 portable: [DeezLoader-3.1.2-win-32-portable.7z]()
+- Linux x64: [DeezLoader-3.1.2-linux-64.AppImage]()
+- Linux x86: [DeezLoader-3.1.2-linux-32.AppImage]()
+- Mac x64: [DeezLoader-3.1.2-mac-64.dmg]()
 
 # Virus total
-- Windows installer: [DeezLoader-3.1.1-win-64&32-installer.exe]()
-- Linux x64: [DeezLoader-3.1.1-linux-64.AppImage]()
-- Linux x86: [DeezLoader-3.1.1-linux-32.AppImage]()
-- Mac x64: [DeezLoader-3.1.1-mac-64.dmg]()
+- Windows installer: [DeezLoader-3.1.2-win-64&32-installer.exe](https://www.virustotal.com/#/file/8d794a8650cde5714efe7768e27e11017ff8aa92af8f3496408da596162098bf)
+- Linux x64: [DeezLoader-3.1.2-linux-64.AppImage]()
+- Linux x86: [DeezLoader-3.1.2-linux-32.AppImage]()
+- Mac x64: [DeezLoader-3.1.2-mac-64.dmg]()
 
 # Donations
 - **BTC/BCH:** 1A25gu2vMXLfQBYArYLMBcTpnuwPiKW6vL
@@ -39,6 +36,74 @@ With this software you can download high-qualiy music and enjoy.
 # How to run
 - Download the installer and run it.
 - Run DeezLoader.
+
+## How to run on Android
+
+Installing DeezLoader on Android is a little bit complicated but easy.<br/>
+If you did installed DeezLoader and would like to just run it, go to step [5](https://github.com/Deezloader/DeezLoader-Reborn#5-run).
+
+### How to update on Android
+
+If you would like to update DeezLoader on android you need to first delete the folder
+
+```
+rm -rf DeezLoader-Reborn
+```
+
+Then follow from step [3](https://github.com/Deezloader/DeezLoader-Reborn#3-download)
+
+### 1. Install Termux
+In order to have DeezLoader on Android you must install `termux`.
+- Play Store: [link](https://play.google.com/store/apps/details?id=com.termux)
+- Apk Mirror: [link](https://www.apkmirror.com/apk/fredrik-fornwall/termux)
+
+### 2. Install dependencies
+Run `Termux` and enter those lines in order:
+```
+pkg update
+pkg upgrade
+pkg install git nodejs
+```
+If it asks you if you want to continue, enter `y`.
+
+### 3. Download
+
+
+To download the release version:
+```
+git clone  https://gitlab.com/Monsterwolf/DeezLoader-Reborn
+```
+Then navigate to the app folder using this command
+```
+cd DeezLoader-Reborn/app
+```
+
+### 4. Install
+
+Now lets install what we have downloaded
+```
+npm install
+```
+In order for DeezLoader to work we need to setup storage for termux
+```
+termux-setup-storage
+```
+
+### 5. Run
+
+In order to run make sure that you are in DeezLoader-Reborn/app folder run
+```
+cd DeezLoader-Reborn/app
+```
+
+Run the server side script
+```
+node app.js
+```
+
+And then go to your browser and enter to this site
+
+[http://localhost:1730](http://localhost:1730)
 
 # How to compile
 - Download Node JS latest version
@@ -60,6 +125,8 @@ With this software you can download high-qualiy music and enjoy.
 
 # Changelogs
 ```
+Version 3.1.2
+- Fixed Album and Playlist Downloader
 Version 3.1.1
 - Fixed Download Freeze
 - Improved logs
@@ -153,7 +220,7 @@ Version 3.0.4
 - Improved tags
 - Changed album cover dir to the albums folder
 - Changed settings style
-- Fixed login crash when there is no connection 
+- Fixed login crash when there is no connection
 Version 3.0.3
 - Added auto login
 - Added MP3 Fallback

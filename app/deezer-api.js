@@ -55,32 +55,40 @@ function Deezer() {
 	this.reqStream = null;
 }
 
+
 Deezer.prototype.init = function(username, password, callback) {
 	var self = this;
-	NRrequest.get({url: "https://www.deezer.com/", headers: this.httpHeaders, jar: true}, (function(err, res, body) {
-		if(!err && res.statusCode == 200) {
-			var regex = new RegExp(/<input id=[\"|']checkForm[\"|'] name=[\"|']checkForm[\"|'] type=[\"|']hidden[\"|'] value=[\"|'](.*)[\"|']>/g);
-			var _token = regex.exec(body);
-			if(_token instanceof Array && _token[1]) {
-				self.apiQueries.api_token = _token[1];
-				NRrequest.post({url: "https://www.deezer.com/ajax/action.php", headers: this.httpHeaders, form: {type:'login',mail:username,password:password}, jar: true}, (function(err, res, body) {
-					if(err || res.statusCode != 200) {
-						callback(new Error("Unable to load deezer.com"));
-					}else if(body.indexOf("success") > -1){
-						callback(null,null);
-					}else{
-						callback(new Error("Incorrect email or password."));
-					}
-				}));
-			} else {
-				callback(new Error("Unable to initialize Deezer API"));
-			}
-		} else {
+	NRrequest.post({url: "https://www.deezer.com/ajax/action.php", headers: this.httpHeaders, form: {type:'login',mail:username,password:password}, jar: true}, (function(err, res, body) {
+		if(err || res.statusCode != 200) {
 			callback(new Error("Unable to load deezer.com"));
-		}
-	}).bind(self));
-}
+		}else if(body.indexOf("success") > -1){
+			request.get({url: "https://www.deezer.com/", headers: this.httpHeaders, jar: true}, (function(err, res, body) {
+				if(!err && res.statusCode == 200) {
+					// var regex = new RegExp(/checkForm\s*=\s*[\"|'](.*)[\"|']/g);
+					// var _token = regex.exec(body);
+					var _token = ["", " "]
 
+					if(_token instanceof Array && _token[1]) {
+						self.apiQueries.api_token = _token[1];
+
+						// GET USER ID
+						const userRegex = new RegExp(/{"USER_ID":"([^",]*)/g);
+						const userId = userRegex.exec(body)[1];
+						self.userId = userId;
+
+						callback(null, null);
+					} else {
+						callback(new Error("Unable to initialize Deezer API"));
+					}
+				} else {
+					callback(new Error("Unable to load deezer.com"));
+				}
+			}).bind(self));
+		}else{
+			callback(new Error("Incorrect email or password."));
+		}
+	}));
+}
 
 
 Deezer.prototype.getPlaylist = function(id, callback) {

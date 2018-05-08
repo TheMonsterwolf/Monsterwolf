@@ -1,3 +1,5 @@
+Version 3.1.2
+- Fixed Album and Playlist Downloader
 Version 3.1.1
 - Fixed Deezer's API change again haha
 Version 3.1.0
@@ -93,7 +95,7 @@ Version 3.0.4
 - Improved tags
 - Changed album cover dir to the albums folder
 - Changed settings style
-- Fixed login crash when there is no connection 
+- Fixed login crash when there is no connection
 Version 3.0.3
 - Added auto login
 - Added MP3 Fallback
@@ -167,7 +169,7 @@ Version 2.1.2
 Version 2.1.1
 - Added context menu
 - Corrected some spelling mistakes
-- Fixed crash when searching with special characters like Æ, Ø and Å.
+- Fixed crash when searching with special characters like ?, ? and ?.
 
 Version 2.1.0
 - Updated all libraries to their latest version (this should fix issues with newer node versions)

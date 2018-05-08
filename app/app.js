@@ -97,7 +97,7 @@ function alencrypt(input) {
 	var iv = crypto.randomBytes(16);
 
 	var data = new Buffer(input).toString('binary');
-		
+
 	key = new Buffer(ekey, "utf8");
 	var cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
 
@@ -109,21 +109,21 @@ function alencrypt(input) {
 	return encoded;
 }
 
-function aldecrypt(encoded) {  
-	var combined = new Buffer(encoded, 'hex');	  
+function aldecrypt(encoded) {
+	var combined = new Buffer(encoded, 'hex');
 
 	key = new Buffer(ekey, "utf8");
-	
+
 	// Create iv
 	var iv = new Buffer(16);
-	
+
 	combined.copy(iv, 0, 0, 16);
 	edata = combined.slice(16).toString('binary');
 	// Decipher encrypted data
 	var decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
 
 	var decrypted, plaintext;
-	
+
 	plaintext = (decipher.update(edata, 'binary', 'utf8') + decipher.final('utf8'));
 
 	return plaintext;
@@ -131,12 +131,15 @@ function aldecrypt(encoded) {
 
 // START sockets clusterfuck
 io.sockets.on('connection', function (socket) {
+	// change versin
+	socket.emit('version', packagejson.version)
 	socket.downloadQueue = [];
 	socket.currentItem = null;
 	socket.lastQueueId = null;
-	request.get("https://pastebin.com/raw/NTxZh1V2", function (error, response, body) {
+	request.get("https://pastebin.com/raw/fTEXMKQH", function (error, response, body) {
 		body = body.replace("\r","");
 		if(!error && response.statusCode == 200){
+			console.log(packagejson);
 			if(body.split("\n")[0] != packagejson.version){
 				socket.emit("newupdate",body.split("\n")[0], body.split("\n")[1]);
 				Deezer.logs('Info',"Outdated version, the latest is "+body.split("\n")[0]);
@@ -284,14 +287,14 @@ io.sockets.on('connection', function (socket) {
 			});
 		} else if (downloading.type == "playlist") {
 			Deezer.logs('Info',"Registered a playlist "+downloading.id);
-			Deezer.getPlaylistTracksAdv(downloading.id, function (tracks, err) {
+			Deezer.getPlaylistTracks(downloading.id, function (tracks, err) {
 				downloading.playlistContent = tracks.data.map((t) => {
 					if(t.FALLBACK){
 						if(t.FALLBACK.SNG_ID){
-							return [t.SNG_ID,t.FALLBACK.SNG_ID];
+							return [t.id,t.FALLBACK.SNG_ID];
 						}
 					}
-					return [t.SNG_ID,0];
+					return [t.id,0];
 				});
 				downloading.settings.plName = downloading.name;
 				async.eachSeries(downloading.playlistContent, function (id, callback) {
@@ -329,14 +332,14 @@ io.sockets.on('connection', function (socket) {
 			});
 		} else if (downloading.type == "album") {
 			Deezer.logs('Info',"Registered an album "+downloading.id);
-			Deezer.getAlbumTracksAdv(downloading.id, function (tracks, err) {
+			Deezer.getAlbumTracks(downloading.id, function (tracks, err) {
 				downloading.playlistContent = tracks.data.map((t) => {
 					if(t.FALLBACK){
 						if(t.FALLBACK.SNG_ID){
-							return [t.SNG_ID,t.FALLBACK.SNG_ID];
+							return [t.id,t.FALLBACK.SNG_ID];
 						}
 					}
-					return [t.SNG_ID,0];
+					return [t.id,0];
 				});
 				downloading.settings.tagPosition = true;
 				downloading.settings.albName = downloading.name;
@@ -568,6 +571,14 @@ io.sockets.on('connection', function (socket) {
 			});
 		});
 	});
+
+	// PLAYLISTS
+	socket.on('my_playlists', function () {
+		Deezer.getMyPlaylists(function (searchObject) {
+			socket.emit('my_playlists', searchObject.data);
+		});
+	});
+	// END PLAYLISTS
 
 	socket.on("search", function (data) {
 		data.type = data.type || "track";
@@ -1065,7 +1076,7 @@ io.sockets.on('connection', function (socket) {
 								const reader = fs.createReadStream(tempPath);
 								const writer = fs.createWriteStream(writePath);
 								let processor = new mflac.Processor({parseMetaDataBlocks: true});
-								
+
 								let vendor = 'reference libFLAC 1.2.1 20070917';
 								let cover = null;
 								if(metadata.imagePath){
@@ -1080,7 +1091,7 @@ io.sockets.on('connection', function (socket) {
 									} else if (mflac.Processor.MDB_TYPE_PICTURE === mdb.type) {
 										mdb.remove();
 									}
-									
+
 									if (mdb.isLast) {
 										var res = 0;
 										if(configFile.userDefined.artworkSize.includes("1400")){
@@ -1101,12 +1112,12 @@ io.sockets.on('connection', function (socket) {
 										mdb.isLast = false;
 									}
 								});
-								
+
 								processor.on('postprocess', (mdb) => {
 									if (mflac.Processor.MDB_TYPE_VORBIS_COMMENT === mdb.type && null !== mdb.vendor) {
 										vendor = mdb.vendor;
 									}
-									
+
 									if (mdbVorbisPicture && mdbVorbisComment) {
 										processor.push(mdbVorbisComment.publish());
 										processor.push(mdbVorbisPicture.publish());
@@ -1118,7 +1129,7 @@ io.sockets.on('connection', function (socket) {
 								reader.on('end', () => {
 									fs.remove(tempPath);
 								});
-									
+
 								reader.pipe(processor).pipe(writer);
 							}else{
 								const songBuffer = fs.readFileSync(tempPath);

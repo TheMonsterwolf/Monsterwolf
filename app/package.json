@@ -1,7 +1,7 @@
 {
 	"name": "deezloader-app",
 	"productName": "Deezloader",
-	"version": "3.1.1",
+	"version": "3.1.2",
 	"description": "Download music from Deezer",
 	"main": "main.js",
 	"author": "ExtendLord",
@@ -18,4 +18,5 @@
 		"socket.io": "latest",
 		"requestretry": "latest"
 	}
+
 }

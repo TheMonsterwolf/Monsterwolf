@@ -2,7 +2,7 @@
 	"serverPort": 1730,
 	"userDefined": {
 		"trackNameTemplate": "%artist% - %title%",
-		"playlistTrackNameTemplate": "%number% - %artist% - %title%",
+		"playlistTrackNameTemplate": "%number%. %artist% - %title%",
 		"albumNameTemplate": "%artist% - %album%",
 		"createM3UFile": false,
 		"createArtistFolder": false,
