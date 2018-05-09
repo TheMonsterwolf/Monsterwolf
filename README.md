@@ -60,9 +60,7 @@ In order to have DeezLoader on Android you must install `termux`.
 ### 2. Install dependencies
 Run `Termux` and enter those lines in order:
 ```
-pkg update
-pkg upgrade
-pkg install git nodejs
+pkg update && pkg upgrade && pkg install git nodejs
 ```
 If it asks you if you want to continue, enter `y`.
 
