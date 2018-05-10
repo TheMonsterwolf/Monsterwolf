@@ -91,6 +91,17 @@ Deezer.prototype.init = function(username, password, callback) {
 }
 
 
+Deezer.prototype.getMyPlaylists = function(callback) {
+	var self = this;
+	getJSON(`https://api.deezer.com/user/${self.userId}/playlists`, function(res){
+		if (!(res instanceof Error)){
+			callback(res);
+		} else {
+			callback(null, res)
+		}
+	})
+}
+
 Deezer.prototype.getPlaylist = function(id, callback) {
 	getJSON("https://api.deezer.com/playlist/" + id, function(res){
 		if (!(res instanceof Error)){
