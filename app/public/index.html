@@ -54,7 +54,7 @@
 			<div class="footer-copyright">
 				<div class="container">
 					&copy; Deezloader original code by <a class="white-text" href="https://boerse.to/members/zzmtv.3378614/">ZzMTV</a>.
-					Currently maintained by <a class="white-text" href="https://www.reddit.com/user/ExtendLord/">ExtendLord</a>.
+			
 				</div>
 			</div>
 		</footer>
@@ -182,8 +182,8 @@
 					<div class="collapsible-header waves-effect"><i class="material-icons">feedback</i>Feedback</div>
 					<div class="collapsible-body">
 						<p>
-							Do you have some feedback or want to ask for some new features? The Telegram Channel is <a href="https://t.me/joinchat/AAAAAFCRjRpUr-IF96RV3g">DeezLoader-Reborn</a> 
-						
+							Do you have some feedback or want to ask for some new features? The Telegram Channel is <a href="https://t.me/joinchat/AAAAAFCRjRpUr-IF96RV3g">DeezLoader-Reborn</a>
+
 						</p>
 					</div>
 				</li>
@@ -595,15 +595,75 @@
 
 		<div class="col s12 tab-wrapper">
 			<ul class="tabs tabs-fixed-width" style="overflow: hidden">
-				<li class="tab col s3"><a href="#tab_search">Search</a></li>
-				<li class="tab col s3"><a href="#tab_charts">Charts</a></li>
-				<li class="tab col s3"><a href="#tab_url">Download from URL</a></li>
-				<li class="tab col s3"><a href="#tab_downloads">Downloads</a></li>
+			<li class="tab col s2"><a href="#tab_my_playlists">My Playlists</a></li>
+				<li class="tab col s2"><a href="#tab_search">Search</a></li>
+				<li class="tab col s2"><a href="#tab_charts">Charts</a></li>
+				<li class="tab col s2"><a href="#tab_url">Download from URL</a></li>
+				<li class="tab col s2"><a href="#tab_downloads">Downloads</a></li>
 			</ul>
 		</div>
+
+		<!-- ############ PLAYLISTS ############ -->
+
+		<div id="tab_my_playlists">
+
+			<div class="row">
+					<div class="col s12">
+						<button id="myPlaylistsRefresh" style="width: 100%" class="btn btn-flat btn-large btn-block right indigo white-text">
+							Refresh
+						</button>
+					</div>
+				</div>
+
+			<div class="row" id="tab_my_playlists_results">
+				<div id="tab_my_playlists_results_searchProgressIndicator" class="row center hide">
+
+				</div>
+				<table id="tab_my_playlists_table_results" class="highlight col s12 responsive-table">
+					<thead>
+					<tr class="animated fadeInUp hide" id="tab_my_playlists_table_results_thead_playlist">
+						<td><!--cover--></td>
+						<td>Name</td>
+						<td>Songs</td>
+						<td><!--download_link--></td>
+					</tr>
+					</thead>
+					<tbody id="tab_my_playlists_table_results_tbody_loadingIndicator" class="hide">
+					<tr>
+						<td class="center">
+							<div class="preloader-wrapper big active">
+								<div class="spinner-layer">
+									<div class="circle-clipper left">
+										<div class="circle"></div>
+									</div>
+									<div class="gap-patch">
+										<div class="circle"></div>
+									</div>
+									<div class="circle-clipper right">
+										<div class="circle"></div>
+									</div>
+								</div>
+							</div>
+						</td>
+					</tr>
+					</tbody>
+					<tbody id="tab_my_playlists_table_results_tbody_results">
+					</tbody>
+					<tbody id="tab_my_playlists_table_results_tbody_noResults" class="animated fadeInUp hide">
+					<tr>
+						<td class="center">Nothing found!</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<!-- ############ TAB SEARCH ############ -->
+
 		<div id="tab_search">
 			<form id="tab_search_form_search" class="row">
 				<div class="inline-input-group">
+
 					<input type="text" id="tab_search_form_search_input_searchString" class="input"
 								 placeholder="Start searching ...">
 					<button class="btn btn-large btn-flat indigo white-text">Search</button>
@@ -697,9 +757,11 @@
 				</table>
 			</div>
 		</div>
+
 		<div id="tab_charts">
 			<div class="row">
 				<div class="input-field col s12">
+
 					<select id="tab_charts_select_country" class="icons">
 						<!--All country selects have to be like the following example:
 						<option value="example" data-icon="images/sample.jpg" class="left circle">Example</option>
@@ -743,6 +805,7 @@
 				</tbody>
 			</table>
 		</div>
+
 		<div id="tab_url">
 			<form id="tab_url_form_url" class="row">
 				<div class="inline-input-group">
@@ -751,6 +814,7 @@
 				</div>
 			</form>
 		</div>
+
 		<div id="tab_downloads">
 			<div class="row">
 				<div class="col s6">
@@ -786,11 +850,10 @@
 			<i class="large material-icons">keyboard_arrow_up</i>
 		</a>
 	</div>
-	<footer class="page-footer hide-on-small-and-down">
+	<footer class="center page-footer hide-on-small-and-down">
 		<div class="footer-copyright">
 			<div class="container">
-				&copy; Deezloader original code by <a class="white-text" href="https://boerse.to/members/zzmtv.3378614/">ZzMTV</a>.
-				Currently maintained by <a class="white-text" href="https://www.reddit.com/user/ExtendLord/">ExtendLord</a>.
+				&copy; Deezloader original code by <a class="white-text" href="https://boerse.to/members/zzmtv.3378614/">ZzMTV</a>
 			</div>
 		</div>
 	</footer>
@@ -800,12 +863,12 @@
 	window.module = module;
 	module = undefined;
 }</script>
-<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
-<script type="text/javascript" src="js/materialize.min.js"></script>
-<script type="text/javascript" src="js/js.cookie.js"></script>
-<script src="js/vue.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.0/js.cookie.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.min.js"></script>
 <script type="text/javascript" src="https://blockchain.info/Resources/js/pay-now-button.js"></script>
-<script src="js/appBase.js"></script>
+<script type="text/javascript" src="js/appBase.js"></script>
 <script type="text/javascript" src="js/main.js"></script>
 <script>if (window.module) module = window.module;</script>
 </body>
