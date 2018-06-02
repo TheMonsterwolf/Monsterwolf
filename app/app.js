@@ -8,7 +8,7 @@
  *
  *
  *
- *  Maintained by ExtendLord <https://www.reddit.com/user/ExtendLord/>
+ *  Maintained by ivandelabeldad <https://github.com/ivandelabeldad/>
  *  Original work by ZzMTV <https://boerse.to/members/zzmtv.3378614/>
  * */
 
@@ -17,11 +17,17 @@ const app = express();
 const server = require('http').createServer(app);
 const https = require('https');
 const mflac = require('flac-metadata');
-const io = require('socket.io').listen(server, {log: false});
+const io = require('socket.io').listen(server, {
+	log: false
+});
 const fs = require('fs-extra');
 const async = require('async');
 const NRrequest = require('request');
-const request = require('requestretry').defaults({maxAttempts: 2147483647, retryDelay: 1000, timeout: 8000});
+const request = require('requestretry').defaults({
+	maxAttempts: 2147483647,
+	retryDelay: 1000,
+	timeout: 8000
+});
 const os = require('os');
 const ID3Writer = require('./lib/browser-id3-writer');
 const Deezer = require('./deezer-api');
@@ -30,33 +36,33 @@ const path = require('path');
 const crypto = require('crypto');
 var userdata = "";
 var homedata = "";
-if(process.env.APPDATA){
+if (process.env.APPDATA) {
 	userdata = process.env.APPDATA + path.sep + "Deezloader\\";
 	homedata = os.homedir();
-}else if(process.platform == "darwin"){
+} else if (process.platform == "darwin") {
 	homedata = os.homedir();
 	userdata = homedata + '/Library/Application Support/Deezloader/';
-}else if(process.platform == "android"){
+} else if (process.platform == "android") {
 	homedata = os.homedir() + "/storage/shared";
 	userdata = homedata + "/Deezloader/";
-}else{
+} else {
 	homedata = os.homedir();
 	userdata = homedata + '/.config/Deezloader/';
 }
 
-if(!fs.existsSync(userdata+"config.json")){
-	fs.outputFileSync(userdata+"config.json",fs.readFileSync(__dirname+path.sep+"default.json",'utf8'));
+if (!fs.existsSync(userdata + "config.json")) {
+	fs.outputFileSync(userdata + "config.json", fs.readFileSync(__dirname + path.sep + "default.json", 'utf8'));
 }
 
-let configFile = require(userdata+path.sep+"config.json");
-if(typeof configFile.userDefined.numplaylistbyalbum != "boolean" || typeof configFile.userDefined.syncedlyrics != "boolean" || typeof configFile.userDefined.padtrck != "boolean" || typeof configFile.userDefined.albumNameTemplate != "string"){
-	fs.outputFileSync(userdata+"config.json",fs.readFileSync(__dirname+path.sep+"default.json",'utf8'));
-	configFile = require(userdata+path.sep+"config.json");
+let configFile = require(userdata + path.sep + "config.json");
+if (typeof configFile.userDefined.numplaylistbyalbum != "boolean" || typeof configFile.userDefined.syncedlyrics != "boolean" || typeof configFile.userDefined.padtrck != "boolean" || typeof configFile.userDefined.albumNameTemplate != "string") {
+	fs.outputFileSync(userdata + "config.json", fs.readFileSync(__dirname + path.sep + "default.json", 'utf8'));
+	configFile = require(userdata + path.sep + "config.json");
 }
 
 // Main Constants
-const configFileLocation = userdata+"config.json";
-const autologinLocation = userdata+"autologin";
+const configFileLocation = userdata + "config.json";
+const autologinLocation = userdata + "autologin";
 const coverArtFolder = os.tmpdir() + path.sep + 'deezloader-imgs' + path.sep;
 const defaultDownloadDir = homedata + path.sep + "Music" + path.sep + 'Deezloader' + path.sep;
 const defaultSettings = {
@@ -103,7 +109,7 @@ function alencrypt(input) {
 
 	var encrypted;
 
-	encrypted =  cipher.update(data, 'utf8', 'binary') +  cipher.final('binary');
+	encrypted = cipher.update(data, 'utf8', 'binary') + cipher.final('binary');
 	var encoded = new Buffer(iv, 'binary').toString('hex') + new Buffer(encrypted, 'binary').toString('hex');
 
 	return encoded;
@@ -131,66 +137,53 @@ function aldecrypt(encoded) {
 
 // START sockets clusterfuck
 io.sockets.on('connection', function (socket) {
-	// change versin
-	socket.emit('version', packagejson.version)
+
 	socket.downloadQueue = [];
 	socket.currentItem = null;
 	socket.lastQueueId = null;
-	request.get("https://pastebin.com/raw/fTEXMKQH", function (error, response, body) {
-		body = body.replace("\r","");
-		if(!error && response.statusCode == 200){
-			console.log(packagejson);
-			if(body.split("\n")[0] != packagejson.version){
-				socket.emit("newupdate",body.split("\n")[0], body.split("\n")[1]);
-				Deezer.logs('Info',"Outdated version, the latest is "+body.split("\n")[0]);
-			}
-		}
-	});
 	socket.on("login", function (username, password, autologin) {
 		Deezer.init(username, password, function (err) {
-			if(err){
+			if (err) {
 				socket.emit("login", err.message);
-				Deezer.logs('Error',"Failed to login, "+err.message);
-			}else{
-				if(autologin){
+				Deezer.logs('Error', "Failed to login, " + err.message);
+			} else {
+				if (autologin) {
 					var data = username + "\n" + password;
-					fs.outputFile(autologinLocation, alencrypt(data) , function(){
-						if(!err){
-							Deezer.logs('Info',"Added autologin successfully");
-						}else{
-							Deezer.logs('Info',"Failed to add autologin file");
+					fs.outputFile(autologinLocation, alencrypt(data), function () {
+						if (!err) {
+							Deezer.logs('Info', "Added autologin successfully");
+						} else {
+							Deezer.logs('Info', "Failed to add autologin file");
 						}
 					});
 				}
 				socket.emit("login", "none");
-				Deezer.logs('Info',"Logged in successfully");
+				Deezer.logs('Info', "Logged in successfully");
 			}
 		});
 	});
-	socket.on("autologin", function(){
-		fs.readFile(autologinLocation, function(err, data){
-			if(err){
-				Deezer.logs('Info',"No auto login found");
+	socket.on("autologin", function () {
+		fs.readFile(autologinLocation, function (err, data) {
+			if (err) {
+				Deezer.logs('Info', "No auto login found");
 				return;
 			}
-			try{
+			try {
 				var fdata = aldecrypt(data.toString('utf8'));
 
-			}catch(e){
-				Deezer.logs('Warning',"Invalid autologin file, deleting");
-				fs.unlink(autologinLocation,function(){
-				});
+			} catch (e) {
+				Deezer.logs('Warning', "Invalid autologin file, deleting");
+				fs.unlink(autologinLocation, function () {});
 				return;
 			}
 			fdata = fdata.split('\n');
-			socket.emit("autologin",fdata[0],fdata[1]);
+			socket.emit("autologin", fdata[0], fdata[1]);
 		});
 	});
 
-	socket.on("logout", function(){
-		Deezer.logs('Info',"Logged out");
-		fs.unlink(autologinLocation,function(){
-		});
+	socket.on("logout", function () {
+		Deezer.logs('Info', "Logged out");
+		fs.unlink(autologinLocation, function () {});
 		return;
 	});
 
@@ -199,14 +192,14 @@ io.sockets.on('connection', function (socket) {
 			return;
 		}
 
-		if(track.trackSocket.currentItem.type == "track"){
+		if (track.trackSocket.currentItem.type == "track") {
 			let complete;
 			if (!track.trackSocket.currentItem.percentage) {
 				track.trackSocket.currentItem.percentage = 0;
 			}
-			if(configFile.userDefined.hifi){
+			if (configFile.userDefined.hifi) {
 				complete = track.FILESIZE_FLAC;
-			}else{
+			} else {
 				if (track.FILESIZE_MP3_320) {
 					complete = track.FILESIZE_MP3_320;
 				} else if (track.FILESIZE_MP3_256) {
@@ -225,8 +218,7 @@ io.sockets.on('connection', function (socket) {
 					percentage: track.trackSocket.currentItem.percentage
 				});
 			}
-		}
-		else if(track.trackSocket.currentItem.type == "album"){
+		} else if (track.trackSocket.currentItem.type == "album") {
 			let numTracks = track.trackSocket.currentItem.size;
 			let downloaded = track.trackSocket.currentItem.downloaded;
 
@@ -265,13 +257,15 @@ io.sockets.on('connection', function (socket) {
 
 		// New batch emits new message
 		if (socket.lastQueueId != downloading.queueId) {
-			socket.emit("downloadStarted", {queueId: downloading.queueId});
+			socket.emit("downloadStarted", {
+				queueId: downloading.queueId
+			});
 			socket.lastQueueId = downloading.queueId;
 		}
 
 		if (downloading.type == "track") {
-			Deezer.logs('Info',"Registered a track "+downloading.id);
-			downloadTrack([downloading.id,0], downloading.settings, null, function (err) {
+			Deezer.logs('Info', "Registered a track " + downloading.id);
+			downloadTrack([downloading.id, 0], downloading.settings, null, function (err) {
 				if (err) {
 					downloading.failed++;
 				} else {
@@ -286,20 +280,20 @@ io.sockets.on('connection', function (socket) {
 				queueDownload(getNextDownload());
 			});
 		} else if (downloading.type == "playlist") {
-			Deezer.logs('Info',"Registered a playlist "+downloading.id);
+			Deezer.logs('Info', "Registered a playlist " + downloading.id);
 			Deezer.getPlaylistTracks(downloading.id, function (tracks, err) {
 				downloading.playlistContent = tracks.data.map((t) => {
-					if(t.FALLBACK){
-						if(t.FALLBACK.SNG_ID){
-							return [t.id,t.FALLBACK.SNG_ID];
+					if (t.FALLBACK) {
+						if (t.FALLBACK.SNG_ID) {
+							return [t.id, t.FALLBACK.SNG_ID];
 						}
 					}
-					return [t.id,0];
+					return [t.id, 0];
 				});
 				downloading.settings.plName = downloading.name;
 				async.eachSeries(downloading.playlistContent, function (id, callback) {
 					if (downloading.cancelFlag) {
-						Deezer.logs('Info',"Stopping the playlist queue");
+						Deezer.logs('Info', "Stopping the playlist queue");
 						callback("stop");
 						return;
 					}
@@ -317,8 +311,8 @@ io.sockets.on('connection', function (socket) {
 						callback();
 					});
 				}, function (err) {
-					Deezer.logs('Info',"Playlist finished "+downloading.name);
-					if(typeof socket.downloadQueue[0] != 'undefined'){
+					Deezer.logs('Info', "Playlist finished " + downloading.name);
+					if (typeof socket.downloadQueue[0] != 'undefined') {
 						socket.emit("downloadProgress", {
 							queueId: socket.downloadQueue[0].queueId,
 							percentage: 100
@@ -331,22 +325,22 @@ io.sockets.on('connection', function (socket) {
 				});
 			});
 		} else if (downloading.type == "album") {
-			Deezer.logs('Info',"Registered an album "+downloading.id);
+			Deezer.logs('Info', "Registered an album " + downloading.id);
 			Deezer.getAlbumTracks(downloading.id, function (tracks, err) {
 				downloading.playlistContent = tracks.data.map((t) => {
-					if(t.FALLBACK){
-						if(t.FALLBACK.SNG_ID){
-							return [t.id,t.FALLBACK.SNG_ID];
+					if (t.FALLBACK) {
+						if (t.FALLBACK.SNG_ID) {
+							return [t.id, t.FALLBACK.SNG_ID];
 						}
 					}
-					return [t.id,0];
+					return [t.id, 0];
 				});
 				downloading.settings.tagPosition = true;
 				downloading.settings.albName = downloading.name;
 				downloading.settings.artName = downloading.artist;
 				async.eachSeries(downloading.playlistContent, function (id, callback) {
 					if (downloading.cancelFlag) {
-						Deezer.logs('Info',"Stopping the album queue");
+						Deezer.logs('Info', "Stopping the album queue");
 						callback("stop");
 						return;
 					}
@@ -371,8 +365,8 @@ io.sockets.on('connection', function (socket) {
 						}
 						socket.emit("updateQueue", downloading);
 					}
-					Deezer.logs('Info',"Album finished "+downloading.name);
-					if(typeof socket.downloadQueue[0] != 'undefined'){
+					Deezer.logs('Info', "Album finished " + downloading.name);
+					if (typeof socket.downloadQueue[0] != 'undefined') {
 						socket.emit("downloadProgress", {
 							queueId: socket.downloadQueue[0].queueId,
 							percentage: 100
@@ -469,9 +463,9 @@ io.sockets.on('connection', function (socket) {
 					return;
 				}
 				for (let i = 0; i < albums.data.length; i++) {
-					Deezer.getAlbumSize(albums.data[i].id, function(size, err){
-						if(err) {
-						  return;
+					Deezer.getAlbumSize(albums.data[i].id, function (size, err) {
+						if (err) {
+							return;
 						}
 						let queueId = "id" + Math.random().toString(36).substring(2);
 						let album = albums.data[i];
@@ -496,26 +490,29 @@ io.sockets.on('connection', function (socket) {
 
 	socket.on("getChartsTopCountry", function () {
 		Deezer.getChartsTopCountry(function (charts, err) {
-			if(err){
+			if (err) {
 				return;
 			}
-			if(charts){
+			if (charts) {
 				charts = charts.data || [];
-			}else{
+			} else {
 				charts = [];
 			}
-			socket.emit("getChartsTopCountry", {charts: charts.data, err: err});
+			socket.emit("getChartsTopCountry", {
+				charts: charts.data,
+				err: err
+			});
 		});
 	});
 
 	socket.on("getChartsCountryList", function (data) {
 		Deezer.getChartsTopCountry(function (charts, err) {
-			if(err){
+			if (err) {
 				return;
 			}
-			if(charts){
+			if (charts) {
 				charts = charts.data || [];
-			}else{
+			} else {
 				charts = [];
 			}
 			let countries = [];
@@ -528,23 +525,28 @@ io.sockets.on('connection', function (socket) {
 				};
 				countries.push(obj);
 			}
-			socket.emit("getChartsCountryList", {countries: countries, selected: data.selected});
+			socket.emit("getChartsCountryList", {
+				countries: countries,
+				selected: data.selected
+			});
 		});
 	});
 
 	socket.on("getChartsTrackListByCountry", function (data) {
 		if (!data.country) {
-			socket.emit("getChartsTrackListByCountry", {err: "No country passed"});
+			socket.emit("getChartsTrackListByCountry", {
+				err: "No country passed"
+			});
 			return;
 		}
 
 		Deezer.getChartsTopCountry(function (charts, err) {
-			if(err){
+			if (err) {
 				return;
 			}
-			if(charts){
+			if (charts) {
 				charts = charts.data || [];
-			}else{
+			} else {
 				charts = [];
 			}
 			let countries = [];
@@ -553,7 +555,9 @@ io.sockets.on('connection', function (socket) {
 			}
 
 			if (countries.indexOf(data.country) == -1) {
-				socket.emit("getChartsTrackListByCountry", {err: "Country not found"});
+				socket.emit("getChartsTrackListByCountry", {
+					err: "Country not found"
+				});
 				return;
 			}
 
@@ -561,7 +565,9 @@ io.sockets.on('connection', function (socket) {
 
 			Deezer.getPlaylistTracks(playlistId, function (tracks, err) {
 				if (err) {
-					socket.emit("getChartsTrackListByCountry", {err: err});
+					socket.emit("getChartsTrackListByCountry", {
+						err: err
+					});
 					return;
 				}
 				socket.emit("getChartsTrackListByCountry", {
@@ -588,16 +594,26 @@ io.sockets.on('connection', function (socket) {
 
 		Deezer.search(encodeURIComponent(data.text), data.type, function (searchObject, err) {
 			try {
-				socket.emit("search", {type: data.type, items: searchObject.data});
+				socket.emit("search", {
+					type: data.type,
+					items: searchObject.data
+				});
 			} catch (e) {
-				socket.emit("search", {type: data.type, items: []});
+				socket.emit("search", {
+					type: data.type,
+					items: []
+				});
 			}
 		});
 	});
 
 	socket.on("getInformation", function (data) {
 		if (!data.type || (["track", "playlist", "album", "artist"].indexOf(data.type) == -1) || !data.id) {
-			socket.emit("getInformation", {err: -1, response: {}, id: data.id});
+			socket.emit("getInformation", {
+				err: -1,
+				response: {},
+				id: data.id
+			});
 			return;
 		}
 
@@ -605,36 +621,66 @@ io.sockets.on('connection', function (socket) {
 
 		Deezer["get" + reqType](data.id, function (response, err) {
 			if (err) {
-				socket.emit("getInformation", {err: "wrong id", response: {}, id: data.id});
+				socket.emit("getInformation", {
+					err: "wrong id",
+					response: {},
+					id: data.id
+				});
 				return;
 			}
-			socket.emit("getInformation", {response: response, id: data.id});
+			socket.emit("getInformation", {
+				response: response,
+				id: data.id
+			});
 		});
 	});
 
 	socket.on("getTrackList", function (data) {
 		if (!data.type || (["playlist", "album", "artist"].indexOf(data.type) == -1) || !data.id) {
-			socket.emit("getTrackList", {err: -1, response: {}, id: data.id, reqType: data.type});
+			socket.emit("getTrackList", {
+				err: -1,
+				response: {},
+				id: data.id,
+				reqType: data.type
+			});
 			return;
 		}
 
 		if (data.type == 'artist') {
 			Deezer.getArtistAlbums(data.id, function (response, err) {
 				if (err) {
-					socket.emit("getTrackList", {err: "wrong id", response: {}, id: data.id, reqType: data.type});
+					socket.emit("getTrackList", {
+						err: "wrong id",
+						response: {},
+						id: data.id,
+						reqType: data.type
+					});
 					return;
 				}
-				socket.emit("getTrackList", {response: response, id: data.id, reqType: data.type});
+				socket.emit("getTrackList", {
+					response: response,
+					id: data.id,
+					reqType: data.type
+				});
 			});
 		} else {
 			let reqType = data.type.charAt(0).toUpperCase() + data.type.slice(1);
 
 			Deezer["get" + reqType + "Tracks"](data.id, function (response, err) {
 				if (err) {
-					socket.emit("getTrackList", {err: "wrong id", response: {}, id: data.id, reqType: data.type});
+					socket.emit("getTrackList", {
+						err: "wrong id",
+						response: {},
+						id: data.id,
+						reqType: data.type
+					});
 					return;
 				}
-				socket.emit("getTrackList", {response: response, id: data.id, reqType: data.type});
+				socket.emit("getTrackList", {
+					response: response,
+					id: data.id,
+					reqType: data.type
+				});
 			});
 		}
 
@@ -666,7 +712,9 @@ io.sockets.on('connection', function (socket) {
 			socket.currentItem.cancelFlag = true;
 		}
 		if (cancel) {
-			socket.emit("cancelDownload", {queueId: data.queueId});
+			socket.emit("cancelDownload", {
+				queueId: data.queueId
+			});
 		}
 	});
 
@@ -676,9 +724,16 @@ io.sockets.on('connection', function (socket) {
 		}
 		let isInQueue = checkIfAlreadyInQueue(data.id);
 		if (isInQueue) {
-			socket.emit("downloadAlreadyInQueue", {alreadyInQueue: true, id: data.id, queueId: isInQueue});
+			socket.emit("downloadAlreadyInQueue", {
+				alreadyInQueue: true,
+				id: data.id,
+				queueId: isInQueue
+			});
 		} else {
-			socket.emit("downloadAlreadyInQueue", {alreadyInQueue: false, id: data.id});
+			socket.emit("downloadAlreadyInQueue", {
+				alreadyInQueue: false,
+				id: data.id
+			});
 		}
 	});
 
@@ -688,7 +743,9 @@ io.sockets.on('connection', function (socket) {
 			settings.downloadLocation = mainFolder;
 		}
 
-		socket.emit('getUserSettings', {settings: settings});
+		socket.emit('getUserSettings', {
+			settings: settings
+		});
 	});
 
 	socket.on("saveSettings", function (settings) {
@@ -702,42 +759,42 @@ io.sockets.on('connection', function (socket) {
 		configFile.userDefined = settings.userDefined;
 		fs.outputFile(configFileLocation, JSON.stringify(configFile, null, 2), function (err) {
 			if (err) return;
-			Deezer.logs('Info',"Settings updated");
+			Deezer.logs('Info', "Settings updated");
 			initFolders();
 		});
 	});
 
 	function downloadTrack(id, settings, altmetadata, callback) {
-		Deezer.logs('Info',"Getting track data");
+		Deezer.logs('Info', "Getting track data");
 		Deezer.getTrack(id[0], function (track, err) {
 			if (err) {
-				if(id[1] != 0){
-					Deezer.logs('Warning',"Failed to download track, falling on alternative");
-					downloadTrack([id[1],0], settings, null, function(err){
+				if (id[1] != 0) {
+					Deezer.logs('Warning', "Failed to download track, falling on alternative");
+					downloadTrack([id[1], 0], settings, null, function (err) {
 						callback(err);
 					});
-				}else{
-					Deezer.logs('Error',"Failed to download track");
+				} else {
+					Deezer.logs('Error', "Failed to download track");
 					callback(err);
 				}
 				return;
 			}
-			Deezer.logs('Info',"Getting album data");
-			Deezer.getAlbum(track["ALB_ID"], function(res, err){
-				if(err){
-					if(id[1] != 0){
-						Deezer.logs('Warning',"Failed to download track, falling on alternative");
-						downloadTrack([id[1],0], settings, null, function(err){
+			Deezer.logs('Info', "Getting album data");
+			Deezer.getAlbum(track["ALB_ID"], function (res, err) {
+				if (err) {
+					if (id[1] != 0) {
+						Deezer.logs('Warning', "Failed to download track, falling on alternative");
+						downloadTrack([id[1], 0], settings, null, function (err) {
 							callback(err);
 						});
-					}else{
-						Deezer.logs('Error',"Failed to download track");
+					} else {
+						Deezer.logs('Error', "Failed to download track");
 						callback(new Error("Album does not exists."));
 					}
 					return;
 				}
-				Deezer.logs('Info',"Getting ATrack data");
-				Deezer.getATrack(res.tracks.data[res.tracks.data.length - 1].id, function(tres){
+				Deezer.logs('Info', "Getting ATrack data");
+				Deezer.getATrack(res.tracks.data[res.tracks.data.length - 1].id, function (tres) {
 					track.trackSocket = socket;
 
 					settings = settings || {};
@@ -745,67 +802,67 @@ io.sockets.on('connection', function (socket) {
 					if (track["VERSION"]) track["SNG_TITLE"] += " " + track["VERSION"];
 					var ajson = res;
 					var tjson = tres;
-					if(track["SNG_CONTRIBUTORS"]){
-						if(track["SNG_CONTRIBUTORS"].composer){
+					if (track["SNG_CONTRIBUTORS"]) {
+						if (track["SNG_CONTRIBUTORS"].composer) {
 							var composertag = "";
 							for (var i = 0; i < track["SNG_CONTRIBUTORS"].composer.length; i++) {
 								composertag += track["SNG_CONTRIBUTORS"].composer[i] + ", ";
 							}
-							composertag = composertag.substring(0,composertag.length-2);
+							composertag = composertag.substring(0, composertag.length - 2);
 						}
-						if(track["SNG_CONTRIBUTORS"].musicpublisher){
+						if (track["SNG_CONTRIBUTORS"].musicpublisher) {
 							var publishertag = "";
 							for (var i = 0; i < track["SNG_CONTRIBUTORS"].musicpublisher.length; i++) {
 								publishertag += track["SNG_CONTRIBUTORS"].musicpublisher[i] + ", ";
 							}
-							publishertag = publishertag.substring(0,publishertag.length-2);
+							publishertag = publishertag.substring(0, publishertag.length - 2);
 						}
-						if(track["SNG_CONTRIBUTORS"].producer){
+						if (track["SNG_CONTRIBUTORS"].producer) {
 							var producertag = "";
 							for (var i = 0; i < track["SNG_CONTRIBUTORS"].producer.length; i++) {
 								producertag += track["SNG_CONTRIBUTORS"].producer[i] + ", ";
 							}
-							producertag = producertag.substring(0,producertag.length-2);
+							producertag = producertag.substring(0, producertag.length - 2);
 						}
-						if(track["SNG_CONTRIBUTORS"].engineer){
+						if (track["SNG_CONTRIBUTORS"].engineer) {
 							var engineertag = "";
 							for (var i = 0; i < track["SNG_CONTRIBUTORS"].engineer.length; i++) {
 								engineertag += track["SNG_CONTRIBUTORS"].engineer[i] + ", ";
 							}
-							engineertag = engineertag.substring(0,engineertag.length-2);
+							engineertag = engineertag.substring(0, engineertag.length - 2);
 						}
-						if(track["SNG_CONTRIBUTORS"].writer){
+						if (track["SNG_CONTRIBUTORS"].writer) {
 							var writertag = "";
 							for (var i = 0; i < track["SNG_CONTRIBUTORS"].writer.length; i++) {
 								writertag += track["SNG_CONTRIBUTORS"].writer[i] + ", ";
 							}
-							writertag = writertag.substring(0,writertag.length-2);
+							writertag = writertag.substring(0, writertag.length - 2);
 						}
-						if(track["SNG_CONTRIBUTORS"].author){
+						if (track["SNG_CONTRIBUTORS"].author) {
 							var authortag = "";
 							for (var i = 0; i < track["SNG_CONTRIBUTORS"].author.length; i++) {
 								authortag += track["SNG_CONTRIBUTORS"].author[i] + ", ";
 							}
-							authortag = authortag.substring(0,authortag.length-2);
+							authortag = authortag.substring(0, authortag.length - 2);
 						}
-						if(track["SNG_CONTRIBUTORS"].mixer){
+						if (track["SNG_CONTRIBUTORS"].mixer) {
 							var mixertag = "";
 							for (var i = 0; i < track["SNG_CONTRIBUTORS"].mixer.length; i++) {
 								mixertag += track["SNG_CONTRIBUTORS"].mixer[i] + ", ";
 							}
-							mixertag = mixertag.substring(0,mixertag.length-2);
+							mixertag = mixertag.substring(0, mixertag.length - 2);
 						}
 					}
 					let metadata;
-					if(altmetadata){
+					if (altmetadata) {
 						metadata = altmetadata;
-						if(track["LYRICS_TEXT"] && !metadata.unsynchronisedLyrics){
+						if (track["LYRICS_TEXT"] && !metadata.unsynchronisedLyrics) {
 							metadata.unsynchronisedLyrics = {
 								description: "",
 								lyrics: track["LYRICS_TEXT"]
 							};
 						}
-					}else{
+					} else {
 						metadata = {
 							title: track["SNG_TITLE"],
 							artist: track["ART_NAME"],
@@ -819,42 +876,42 @@ io.sockets.on('connection', function (socket) {
 							explicit: track["EXPLICIT_LYRICS"],
 							rtype: ajson.record_type
 						};
-						if(track["COPYRIGHT"]){
+						if (track["COPYRIGHT"]) {
 							metadata.copyright = track["COPYRIGHT"];
 						}
-						if(composertag){
+						if (composertag) {
 							metadata.composer = composertag;
 						}
-						if(mixertag){
+						if (mixertag) {
 							metadata.mixer = mixertag;
 						}
-						if(authortag){
+						if (authortag) {
 							metadata.author = authortag;
 						}
-						if(writertag){
+						if (writertag) {
 							metadata.writer = writertag;
 						}
-						if(engineertag){
+						if (engineertag) {
 							metadata.engineer = engineertag;
 						}
-						if(producertag){
+						if (producertag) {
 							metadata.producer = producertag;
 						}
-						if(track["LYRICS_TEXT"]){
+						if (track["LYRICS_TEXT"]) {
 							metadata.unsynchronisedLyrics = {
 								description: "",
 								lyrics: track["LYRICS_TEXT"]
 							};
 						}
-						if(publishertag){
+						if (publishertag) {
 							metadata.publisher = publishertag;
 						}
-						if(settings.plName && !(settings.createArtistFolder || settings.createAlbumFolder) && !configFile.userDefined.numplaylistbyalbum){
-							metadata.trackNumber = (parseInt(settings.playlist.position)+1).toString() + "/" + settings.playlist.fullSize;
+						if (settings.plName && !(settings.createArtistFolder || settings.createAlbumFolder) && !configFile.userDefined.numplaylistbyalbum) {
+							metadata.trackNumber = (parseInt(settings.playlist.position) + 1).toString() + "/" + settings.playlist.fullSize;
 							metadata.partOfSet = "1/1";
 						}
-						if(settings.artName){
-							metadata.trackNumber = (settings.playlist.position+1).toString() + "/" + ajson.nb_tracks;
+						if (settings.artName) {
+							metadata.trackNumber = (settings.playlist.position + 1).toString() + "/" + ajson.nb_tracks;
 						}
 						if (0 < parseInt(track["BPM"])) {
 							metadata.bpm = track["BPM"];
@@ -862,7 +919,7 @@ io.sockets.on('connection', function (socket) {
 						if (track["GAIN"]) {
 							metadata.trackgain = track["GAIN"];
 						}
-						if(ajson.genres && ajson.genres.data[0] && ajson.genres.data[0].name){
+						if (ajson.genres && ajson.genres.data[0] && ajson.genres.data[0].name) {
 							metadata.genre = ajson.genres.data[0].name;
 						}
 
@@ -873,7 +930,7 @@ io.sockets.on('connection', function (socket) {
 						if (ajson.release_date) {
 							metadata.year = ajson.release_date.slice(0, 4);
 							metadata.date = ajson.release_date;
-						}else if(track["PHYSICAL_RELEASE_DATE"]){
+						} else if (track["PHYSICAL_RELEASE_DATE"]) {
 							metadata.year = track["PHYSICAL_RELEASE_DATE"].slice(0, 4);
 							metadata.date = track["PHYSICAL_RELEASE_DATE"];
 						}
@@ -885,54 +942,54 @@ io.sockets.on('connection', function (socket) {
 
 					let filepath = mainFolder;
 					if (settings.createArtistFolder || settings.createAlbumFolder) {
-						if(settings.plName){
+						if (settings.plName) {
 							filepath += antiDot(fixName(settings.plName)) + path.sep;
 						}
 						if (settings.createArtistFolder) {
-							if(settings.artName){
+							if (settings.artName) {
 								filepath += antiDot(fixName(settings.artName)) + path.sep;
-							}else{
+							} else {
 								filepath += antiDot(fixName(metadata.artist)) + path.sep;
 							}
 						}
 
 						if (settings.createAlbumFolder) {
-							if(settings.artName){
-								filepath += antiDot(fixName(settingsRegexAlbum(metadata,settings.foldername,settings.artName,settings.albName))) + path.sep;
-							}else{
-								filepath += antiDot(fixName(settingsRegexAlbum(metadata,settings.foldername,metadata.performerInfo,metadata.album))) + path.sep;
+							if (settings.artName) {
+								filepath += antiDot(fixName(settingsRegexAlbum(metadata, settings.foldername, settings.artName, settings.albName))) + path.sep;
+							} else {
+								filepath += antiDot(fixName(settingsRegexAlbum(metadata, settings.foldername, metadata.performerInfo, metadata.album))) + path.sep;
 							}
 						}
 					} else if (settings.plName) {
 						filepath += antiDot(fixName(settings.plName)) + path.sep;
 					} else if (settings.artName) {
-						filepath += antiDot(fixName(settingsRegexAlbum(metadata,settings.foldername,settings.artName,settings.albName))) + path.sep;
+						filepath += antiDot(fixName(settingsRegexAlbum(metadata, settings.foldername, settings.artName, settings.albName))) + path.sep;
 					}
 
 					let writePath;
-					if(track.format == 9){
+					if (track.format == 9) {
 						writePath = filepath + filename + '.flac';
-					}else{
+					} else {
 						writePath = filepath + filename + '.mp3';
 					}
-					if(track["LYRICS_SYNC_JSON"] && configFile.userDefined.syncedlyrics){
+					if (track["LYRICS_SYNC_JSON"] && configFile.userDefined.syncedlyrics) {
 						var lyricsbuffer = "";
-						for(var i=0;i<track["LYRICS_SYNC_JSON"].length;i++){
-							if(track["LYRICS_SYNC_JSON"][i].lrc_timestamp){
-								lyricsbuffer += track["LYRICS_SYNC_JSON"][i].lrc_timestamp+track["LYRICS_SYNC_JSON"][i].line+"\r\n";
-							}else if(i+1 < track["LYRICS_SYNC_JSON"].length){
-								lyricsbuffer += track["LYRICS_SYNC_JSON"][i+1].lrc_timestamp+track["LYRICS_SYNC_JSON"][i].line+"\r\n";
+						for (var i = 0; i < track["LYRICS_SYNC_JSON"].length; i++) {
+							if (track["LYRICS_SYNC_JSON"][i].lrc_timestamp) {
+								lyricsbuffer += track["LYRICS_SYNC_JSON"][i].lrc_timestamp + track["LYRICS_SYNC_JSON"][i].line + "\r\n";
+							} else if (i + 1 < track["LYRICS_SYNC_JSON"].length) {
+								lyricsbuffer += track["LYRICS_SYNC_JSON"][i + 1].lrc_timestamp + track["LYRICS_SYNC_JSON"][i].line + "\r\n";
 							}
 						}
-						if(track.format == 9){
-							fs.outputFile(writePath.substring(0,writePath.length-5)+".lrc",lyricsbuffer,function(){});
-						}else{
-							fs.outputFile(writePath.substring(0,writePath.length-4)+".lrc",lyricsbuffer,function(){});
+						if (track.format == 9) {
+							fs.outputFile(writePath.substring(0, writePath.length - 5) + ".lrc", lyricsbuffer, function () {});
+						} else {
+							fs.outputFile(writePath.substring(0, writePath.length - 4) + ".lrc", lyricsbuffer, function () {});
 						}
 					}
-					Deezer.logs('Info','Downloading file to ' + writePath);
+					Deezer.logs('Info', 'Downloading file to ' + writePath);
 					if (fs.existsSync(writePath)) {
-						Deezer.logs('Info',"Already downloaded: " + metadata.artist + ' - ' + metadata.title);
+						Deezer.logs('Info', "Already downloaded: " + metadata.artist + ' - ' + metadata.title);
 						callback();
 						return;
 					}
@@ -941,105 +998,108 @@ io.sockets.on('connection', function (socket) {
 					if (metadata.image) {
 						let imgPath;
 						//If its not from an album but a playlist.
-						if(!settings.tagPosition && !settings.createAlbumFolder){
+						if (!settings.tagPosition && !settings.createAlbumFolder) {
 							imgPath = coverArtFolder + fixName(metadata.ISRC) + ".jpg";
-						}else{
+						} else {
 							imgPath = filepath + "folder.jpg";
 						}
-						if(fs.existsSync(imgPath) && !imgPath.includes(coverArtFolder)){
+						if (fs.existsSync(imgPath) && !imgPath.includes(coverArtFolder)) {
 							metadata.imagePath = (imgPath).replace(/\\/g, "/");
-							Deezer.logs('Info',"Starting the download process CODE:1");
+							Deezer.logs('Info', "Starting the download process CODE:1");
 							condownload();
-						}else{
-							request.get(metadata.image, {encoding: 'binary'}, function(error,response,body){
-								if(error){
+						} else {
+							request.get(metadata.image, {
+								encoding: 'binary'
+							}, function (error, response, body) {
+								if (error) {
 									Deezer.logs('Error', error.stack);
 									metadata.image = undefined;
 									metadata.imagePath = undefined;
 									return;
 								}
-								fs.outputFile(imgPath,body,'binary',function(err){
-									if(err){
+								fs.outputFile(imgPath, body, 'binary', function (err) {
+									if (err) {
 										Deezer.logs('Error', err.stack);
-									metadata.image = undefined;
-									metadata.imagePath = undefined;
+										metadata.image = undefined;
+										metadata.imagePath = undefined;
 										return;
 									}
 									metadata.imagePath = (imgPath).replace(/\\/g, "/");
-									Deezer.logs('Info',"Starting the download process CODE:2");
+									Deezer.logs('Info', "Starting the download process CODE:2");
 									condownload();
 								})
 							});
 						}
-					}else{
+					} else {
 						metadata.image = undefined;
-						Deezer.logs('Info',"Starting the download process CODE:3");
+						Deezer.logs('Info', "Starting the download process CODE:3");
 						condownload();
 					}
-					function condownload(){
-						var tempPath = writePath+".temp";
-						Deezer.logs('Info',"Downloading and decrypting");
-						Deezer.decryptTrack(tempPath,track, function (err) {
+
+					function condownload() {
+						var tempPath = writePath + ".temp";
+						Deezer.logs('Info', "Downloading and decrypting");
+						Deezer.decryptTrack(tempPath, track, function (err) {
 							if (err && err.message == "aborted") {
 								socket.currentItem.cancelFlag = true;
-								Deezer.logs('Info',"Track got aborted");
+								Deezer.logs('Info', "Track got aborted");
 								callback();
 								return;
 							}
 							if (err) {
 								Deezer.hasTrackAlternative(id[0], function (alternative, err) {
 									if (err || !alternative) {
-										Deezer.logs('Error',"Failed to download: " + metadata.artist + " - " + metadata.title);
+										Deezer.logs('Error', "Failed to download: " + metadata.artist + " - " + metadata.title);
 										callback(err);
 										return;
 									}
-									Deezer.logs('Error',"Failed to download: " + metadata.artist + " - " + metadata.title+", falling on alternative");
-									downloadTrack([alternative.SNG_ID,0], settings, metadata, callback);
+									Deezer.logs('Error', "Failed to download: " + metadata.artist + " - " + metadata.title + ", falling on alternative");
+									downloadTrack([alternative.SNG_ID, 0], settings, metadata, callback);
 								});
 								return;
 							}
 							if (settings.createM3UFile && settings.playlist) {
-								if(track.format == 9){
+								if (track.format == 9) {
 									fs.appendFileSync(filepath + "playlist.m3u", filename + ".flac\r\n");
-								}else{
+								} else {
 									fs.appendFileSync(filepath + "playlist.m3u", filename + ".mp3\r\n");
 								}
 							}
-							Deezer.logs('Info',"Downloaded: " + metadata.artist + " - " + metadata.title);
+							Deezer.logs('Info', "Downloaded: " + metadata.artist + " - " + metadata.title);
 							metadata.artist = '';
 							var first = true;
-							track['ARTISTS'].forEach(function(artist){
-								if(first){
+							track['ARTISTS'].forEach(function (artist) {
+								if (first) {
 									metadata.artist = artist['ART_NAME'];
 									first = false;
-								} else{
-									if(metadata.artist.indexOf(artist['ART_NAME']) == -1)
+								} else {
+									if (metadata.artist.indexOf(artist['ART_NAME']) == -1)
 										metadata.artist += ', ' + artist['ART_NAME'];
 								}
 							});
 
-							if(track.format == 9){
+							if (track.format == 9) {
 								let flacComments = [
 									'TITLE=' + metadata.title,
 									'ALBUM=' + metadata.album,
 									'ALBUMARTIST=' + metadata.performerInfo,
 									'ARTIST=' + metadata.artist,
-									'TRACKNUMBER=' + splitNumber(metadata.trackNumber,false),
-									'DISCNUMBER=' + splitNumber(metadata.partOfSet,false),
-									'TRACKTOTAL=' + splitNumber(metadata.trackNumber,true),
-									'DISCTOTAL=' + splitNumber(metadata.partOfSet,true),
+									'TRACKNUMBER=' + splitNumber(metadata.trackNumber, false),
+									'DISCNUMBER=' + splitNumber(metadata.partOfSet, false),
+									'TRACKTOTAL=' + splitNumber(metadata.trackNumber, true),
+									'DISCTOTAL=' + splitNumber(metadata.partOfSet, true),
 									'LENGTH=' + metadata.length,
 									'ISRC=' + metadata.ISRC,
 									'BARCODE=' + metadata.BARCODE,
 									'ITUNESADVISORY=' + metadata.explicit
 								];
-								if(metadata.unsynchronisedLyrics){
-									flacComments.push('LYRICS='+metadata.unsynchronisedLyrics.lyrics);
+								if (metadata.unsynchronisedLyrics) {
+									flacComments.push('LYRICS=' + metadata.unsynchronisedLyrics.lyrics);
 								}
-								if(metadata.genre){
+								if (metadata.genre) {
 									flacComments.push('GENRE=' + metadata.genre);
 								}
-								if(metadata.copyright){
+								if (metadata.copyright) {
 									flacComments.push('COPYRIGHT=' + metadata.copyright);
 								}
 								if (0 < parseInt(metadata.year)) {
@@ -1049,37 +1109,39 @@ io.sockets.on('connection', function (socket) {
 								if (0 < parseInt(metadata.bpm)) {
 									flacComments.push('BPM=' + metadata.bpm);
 								}
-								if(metadata.composer){
+								if (metadata.composer) {
 									flacComments.push('COMPOSER=' + metadata.composer);
 								}
-								if(metadata.publisher){
+								if (metadata.publisher) {
 									flacComments.push('ORGANIZATION=' + metadata.publisher);
 								}
-								if(metadata.mixer){
+								if (metadata.mixer) {
 									flacComments.push('MIXER=' + metadata.mixer);
 								}
-								if(metadata.author){
+								if (metadata.author) {
 									flacComments.push('AUTHOR=' + metadata.author);
 								}
-								if(metadata.writer){
+								if (metadata.writer) {
 									flacComments.push('WRITER=' + metadata.writer);
 								}
-								if(metadata.engineer){
+								if (metadata.engineer) {
 									flacComments.push('ENGINEER=' + metadata.engineer);
 								}
-								if(metadata.producer){
+								if (metadata.producer) {
 									flacComments.push('PRODUCER=' + metadata.producer);
 								}
-								if(metadata.trackgain){
+								if (metadata.trackgain) {
 									flacComments.push('REPLAYGAIN_TRACK_GAIN=' + metadata.trackgain);
 								}
 								const reader = fs.createReadStream(tempPath);
 								const writer = fs.createWriteStream(writePath);
-								let processor = new mflac.Processor({parseMetaDataBlocks: true});
+								let processor = new mflac.Processor({
+									parseMetaDataBlocks: true
+								});
 
 								let vendor = 'reference libFLAC 1.2.1 20070917';
 								let cover = null;
-								if(metadata.imagePath){
+								if (metadata.imagePath) {
 									cover = fs.readFileSync(metadata.imagePath);
 								}
 								let mdbVorbisPicture;
@@ -1094,18 +1156,18 @@ io.sockets.on('connection', function (socket) {
 
 									if (mdb.isLast) {
 										var res = 0;
-										if(configFile.userDefined.artworkSize.includes("1400")){
+										if (configFile.userDefined.artworkSize.includes("1400")) {
 											res = 1400;
-										}else if(configFile.userDefined.artworkSize.includes("1200")){
+										} else if (configFile.userDefined.artworkSize.includes("1200")) {
 											res = 1200;
-										}else if(configFile.userDefined.artworkSize.includes("1000")){
+										} else if (configFile.userDefined.artworkSize.includes("1000")) {
 											res = 1000;
-										}else if(configFile.userDefined.artworkSize.includes("800")){
+										} else if (configFile.userDefined.artworkSize.includes("800")) {
 											res = 800;
-										}else if(configFile.userDefined.artworkSize.includes("500")){
+										} else if (configFile.userDefined.artworkSize.includes("500")) {
 											res = 500;
 										}
-										if(cover){
+										if (cover) {
 											mdbVorbisPicture = mflac.data.MetaDataBlockPicture.create(true, 3, 'image/jpeg', '', res, res, 24, 0, cover);
 										}
 										mdbVorbisComment = mflac.data.MetaDataBlockVorbisComment.create(false, vendor, flacComments);
@@ -1121,7 +1183,7 @@ io.sockets.on('connection', function (socket) {
 									if (mdbVorbisPicture && mdbVorbisComment) {
 										processor.push(mdbVorbisComment.publish());
 										processor.push(mdbVorbisPicture.publish());
-									}else if(mdbVorbisComment){
+									} else if (mdbVorbisComment) {
 										processor.push(mdbVorbisComment.publish());
 									}
 								});
@@ -1131,7 +1193,7 @@ io.sockets.on('connection', function (socket) {
 								});
 
 								reader.pipe(processor).pipe(writer);
-							}else{
+							} else {
 								const songBuffer = fs.readFileSync(tempPath);
 								const writer = new ID3Writer(songBuffer);
 								writer.setFrame('TIT2', metadata.title)
@@ -1146,7 +1208,7 @@ io.sockets.on('connection', function (socket) {
 										description: 'BARCODE',
 										value: metadata.BARCODE
 									})
-								if(metadata.imagePath){
+								if (metadata.imagePath) {
 									const coverBuffer = fs.readFileSync(metadata.imagePath);
 									writer.setFrame('APIC', {
 										type: 3,
@@ -1154,16 +1216,16 @@ io.sockets.on('connection', function (socket) {
 										description: 'front cover'
 									});
 								}
-								if(metadata.unsynchronisedLyrics){
+								if (metadata.unsynchronisedLyrics) {
 									writer.setFrame('USLT', metadata.unsynchronisedLyrics);
 								}
-								if(metadata.publisher){
+								if (metadata.publisher) {
 									writer.setFrame('TPUB', metadata.publisher);
 								}
-								if(metadata.genre){
+								if (metadata.genre) {
 									writer.setFrame('TCON', [metadata.genre]);
 								}
-								if(metadata.copyright){
+								if (metadata.copyright) {
 									writer.setFrame('TCOP', metadata.copyright);
 								}
 								if (0 < parseInt(metadata.year)) {
@@ -1173,10 +1235,10 @@ io.sockets.on('connection', function (socket) {
 								if (0 < parseInt(metadata.bpm)) {
 									writer.setFrame('TBPM', metadata.bpm);
 								}
-								if(metadata.composer){
+								if (metadata.composer) {
 									writer.setFrame('TCOM', [metadata.composer]);
 								}
-								if(metadata.trackgain){
+								if (metadata.trackgain) {
 									writer.setFrame('TXXX', {
 										description: 'REPLAYGAIN_TRACK_GAIN',
 										value: metadata.trackgain
@@ -1223,7 +1285,7 @@ function updateSettingsFile(config, value) {
 
 	fs.outputFile(configFileLocation, JSON.stringify(configFile, null, 2), function (err) {
 		if (err) return;
-		Deezer.logs('Info',"Settings updated");
+		Deezer.logs('Info', "Settings updated");
 
 		// FIXME: Endless Loop, due to call from initFolders()...crashes soon after startup
 		// initFolders();
@@ -1231,16 +1293,16 @@ function updateSettingsFile(config, value) {
 }
 
 
-function fixName (txt) {
-  const regEx = /[\0\/\\:*?"<>|]/g;
-  return txt.replace(regEx, '_');
+function fixName(txt) {
+	const regEx = /[\0\/\\:*?"<>|]/g;
+	return txt.replace(regEx, '_');
 }
 
-function antiDot(str){
-	while(str[str.length-1] == "." || str[str.length-1] == " " || str[str.length-1] == "\n"){
-		str = str.substring(0,str.length-1);
+function antiDot(str) {
+	while (str[str.length - 1] == "." || str[str.length - 1] == " " || str[str.length - 1] == "\n") {
+		str = str.substring(0, str.length - 1);
 	}
-	if(str.length < 1){
+	if (str.length < 1) {
 		str = "dot";
 	}
 	return fixName(str);
@@ -1273,10 +1335,10 @@ function settingsRegex(metadata, filename, playlist) {
 	filename = filename.replace(/%album%/g, metadata.album);
 	filename = filename.replace(/%artist%/g, metadata.artist);
 	filename = filename.replace(/%year%/g, metadata.year);
-	if(typeof metadata.trackNumber != 'undefined'){
-		if(configFile.userDefined.padtrck){
-			 filename = filename.replace(/%number%/g, pad(splitNumber(metadata.trackNumber, false), splitNumber(metadata.trackNumber, true)));
-		}else{
+	if (typeof metadata.trackNumber != 'undefined') {
+		if (configFile.userDefined.padtrck) {
+			filename = filename.replace(/%number%/g, pad(splitNumber(metadata.trackNumber, false), splitNumber(metadata.trackNumber, true)));
+		} else {
 			filename = filename.replace(/%number%/g, splitNumber(metadata.trackNumber, false));
 		}
 	} else {
@@ -1316,14 +1378,14 @@ function pad(str, max) {
  * @param string str
  * @return string
  */
-function splitNumber(str,total){
+function splitNumber(str, total) {
 	str = str.toString();
 	var i = str.indexOf("/");
-	if(total && i > 0){
-		return str.slice(i+1, str.length);
-	}else if(i > 0){
+	if (total && i > 0) {
+		return str.slice(i + 1, str.length);
+	} else if (i > 0) {
 		return str.slice(0, i);
-	}else{
+	} else {
 		return str;
 	}
 	return i > 0 ? str.slice(0, i) : str;
@@ -1349,7 +1411,7 @@ function magicInterval(success, delay, repetitions) {
 
 // Show crash error in console for debugging
 process.on('uncaughtException', function (err) {
-	Deezer.logs('Error',err.stack,function(){
+	Deezer.logs('Error', err.stack, function () {
 		socket.emit("message", "Critical Error, report to the developer", err.stack);
 	});
 });

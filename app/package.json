@@ -4,7 +4,7 @@
 	"version": "3.1.2",
 	"description": "Download music from Deezer",
 	"main": "main.js",
-	"author": "ExtendLord",
+	"author": "Made by ZzMTV, formerly maintained by ExtendLord",
 	"license": "CC-BY-NC-SA-4.0",
 	"dependencies": {
 		"async": "latest",
@@ -18,5 +18,4 @@
 		"socket.io": "latest",
 		"requestretry": "latest"
 	}
-
 }

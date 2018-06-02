@@ -26,36 +26,36 @@ require('electron-context-menu')({
 	showInspectElement: false
 });
 
-function loadSettings(){
+function loadSettings() {
 	var userdata = "";
 	var homedata = "";
-	if(process.env.APPDATA){
+	if (process.env.APPDATA) {
 		userdata = process.env.APPDATA + path.sep + "Deezloader\\";
 		homedata = os.homedir();
-	}else if(process.platform == "darwin"){
+	} else if (process.platform == "darwin") {
 		homedata = os.homedir();
 		userdata = homedata + '/Library/Application Support/Deezloader/';
-	}else if(process.platform == "android"){
+	} else if (process.platform == "android") {
 		homedata = os.homedir() + "/storage/shared";
 		userdata = homedata + "/Deezloader/";
-	}else{
+	} else {
 		homedata = os.homedir();
 		userdata = homedata + '/.config/Deezloader/';
 	}
 
-	if(!fs.existsSync(userdata+"config.json")){
-		fs.outputFileSync(userdata+"config.json",fs.readFileSync(__dirname+path.sep+"default.json",'utf8'));
+	if (!fs.existsSync(userdata + "config.json")) {
+		fs.outputFileSync(userdata + "config.json", fs.readFileSync(__dirname + path.sep + "default.json", 'utf8'));
 	}
 
-	appConfig = require(userdata+path.sep+"config.json");
+	appConfig = require(userdata + path.sep + "config.json");
 
-	if(typeof appConfig.userDefined.numplaylistbyalbum != "boolean" || typeof appConfig.userDefined.syncedlyrics != "boolean" || typeof appConfig.userDefined.padtrck != "boolean" || typeof appConfig.userDefined.albumNameTemplate != "string"){
-		fs.outputFileSync(userdata+"config.json",fs.readFileSync(__dirname+path.sep+"default.json",'utf8'));
-		appConfig = require(userdata+path.sep+"config.json");
+	if (typeof appConfig.userDefined.numplaylistbyalbum != "boolean" || typeof appConfig.userDefined.syncedlyrics != "boolean" || typeof appConfig.userDefined.padtrck != "boolean" || typeof appConfig.userDefined.albumNameTemplate != "string") {
+		fs.outputFileSync(userdata + "config.json", fs.readFileSync(__dirname + path.sep + "default.json", 'utf8'));
+		appConfig = require(userdata + path.sep + "config.json");
 	}
 }
 
-function createWindow () {
+function createWindow() {
 	// Create the browser window.
 	mainWindow = new BrowserWindow({
 		width: mainWindowState.width,
@@ -66,8 +66,7 @@ function createWindow () {
 		icon: __dirname + "/icon.png"
 	});
 
-	// TEMP
-	// mainWindow.setMenu(null);
+	mainWindow.setMenu(null);
 
 	// and load the index.html of the app.
 	mainWindow.loadURL('http://localhost:' + appConfig.serverPort);
